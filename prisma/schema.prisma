@@ -1,0 +1,66 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Anunciante {
+  id          String       @id @default(cuid())
+  nome        String
+  empresa     String
+  email       String       @unique
+  telefone    String
+  segmento    String
+  status      String       @default("ativo")
+  saldo       Float        @default(0)
+  criadoEm    DateTime     @default(now())
+  campanhas   Campanha[]
+  transacoes  Transacao[]
+}
+
+model Campanha {
+  id            String       @id @default(cuid())
+  titulo        String
+  descricao     String
+  orcamento     Float
+  gasto         Float        @default(0)
+  status        String       @default("rascunho")
+  tipo          String
+  impressoes    Int          @default(0)
+  cliques       Int          @default(0)
+  inicioEm      DateTime?
+  fimEm         DateTime?
+  criadoEm      DateTime     @default(now())
+  anuncianteId  String
+  anunciante    Anunciante   @relation(fields: [anuncianteId], references: [id])
+  transacoes    Transacao[]
+}
+
+model Transacao {
+  id              String      @id @default(cuid())
+  descricao       String
+  valor           Float
+  taxaProcessamento Float
+  totalCobrado    Float
+  tipo            String
+  status          String      @default("pendente")
+  criadoEm        DateTime    @default(now())
+  anuncianteId    String
+  anunciante      Anunciante  @relation(fields: [anuncianteId], references: [id])
+  campanhaId      String?
+  campanha        Campanha?   @relation(fields: [campanhaId], references: [id])
+}
+
+model TaxaProcessamento {
+  id          String   @id @default(cuid())
+  nome        String
+  tipo        String
+  valor       Float
+  descricao   String
+  ativo       Boolean  @default(true)
+  criadoEm   DateTime @default(now())
+}
