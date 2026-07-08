@@ -25,12 +25,6 @@ const anunciantes = [
   { id: 10, name: "Daniela F.", location: "Itaigara", rating: 4.8, initials: "DF", sessions: 89, photo: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200" },
 ];
 
-const aoVivo = [
-  { id: 1, name: "Mariana L.", location: "Barra", initials: "ML" },
-  { id: 2, name: "Carla T.", location: "Cerita", initials: "CT" },
-  { id: 3, name: "Juliana F.", location: "Barra", initials: "JF" },
-];
-
 const CIDADES: Record<string, string[]> = {
   BA: ["Salvador", "Feira de Santana", "Vitória da Conquista", "Ilhéus", "Itabuna"],
   SP: ["São Paulo", "Campinas", "Santos", "Ribeirão Preto", "São José dos Campos"],
@@ -69,9 +63,6 @@ export default function PublicHome() {
           <nav className="hidden md:flex items-center gap-6 text-sm text-gray-400">
             <Link href="#explorar" className="hover:text-white transition-colors">
               Explorar
-            </Link>
-            <Link href="#ao-vivo" className="hover:text-white transition-colors">
-              Ao Vivo
             </Link>
             <Link href="/premium" className="hover:text-white transition-colors">
               Premium
@@ -196,158 +187,85 @@ export default function PublicHome() {
 
       {/* Main content */}
       <section id="explorar" className="max-w-7xl mx-auto px-6 py-10">
-        <div className="flex gap-7">
-          {/* Cards grid */}
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <h2 className="text-xl font-bold" style={{ color: "#c9a84c" }}>
-                  Anunciantes Verificados
-                </h2>
-                <p className="text-xs text-gray-500 mt-0.5">
-                  Vídeo-Check disponível em 1 minuto
-                </p>
-              </div>
-              <div
-                className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full border"
-                style={{ borderColor: "#1a2a1a", color: "#c9a84c" }}
-              >
-                <span
-                  className="w-1.5 h-1.5 rounded-full animate-pulse"
-                  style={{ backgroundColor: "#c9a84c" }}
-                />
-                {anunciantes.length} disponíveis
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
-              {anunciantes.map((a) => (
-                <div
-                  key={a.id}
-                  onClick={() => router.push(`/perfil/${a.id}`)}
-                  className="rounded-2xl overflow-hidden cursor-pointer group relative"
-                  style={{
-                    backgroundImage:
-                      "photo" in a && a.photo
-                        ? `url('${(a.photo as string).replace("?w=200", "?w=400&q=80")}')`
-                        : undefined,
-                    backgroundSize: "cover",
-                    backgroundPosition: "center top",
-                    aspectRatio: "3 / 4",
-                    backgroundColor: "#1a2a1a",
-                  }}
-                >
-                  {/* Overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent transition-opacity group-hover:from-black/80" />
-
-                  {/* Content */}
-                  <div className="relative z-10 h-full flex flex-col justify-between p-4">
-                    {/* Top: badge + live dot */}
-                    <div className="flex items-center justify-between">
-                      <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-full border border-green-800/60 backdrop-blur-sm" style={{ backgroundColor: "rgba(0,0,0,0.5)", color: "#4ade80" }}>
-                        <ShieldCheck size={9} />
-                        Verificada
-                      </span>
-                      <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-                    </div>
-
-                    {/* Bottom: name, location, rating, CTA */}
-                    <div style={{ position: "relative", zIndex: 10 }}>
-                      <p className="font-bold text-white text-base leading-tight">{a.name}</p>
-                      <div className="flex items-center gap-1 mt-0.5">
-                        <MapPin size={10} className="text-gray-400 shrink-0" />
-                        <span className="text-xs text-gray-300">{a.location}</span>
-                      </div>
-                      <div className="flex items-center gap-1.5 mt-1">
-                        <Star size={11} style={{ color: "#c9a84c", fill: "#c9a84c" }} />
-                        <span className="text-xs font-bold" style={{ color: "#c9a84c" }}>
-                          {a.rating.toFixed(1)}
-                        </span>
-                        <span className="text-[10px] text-gray-400">· {a.sessions} sessões</span>
-                      </div>
-                      <Link
-                        href="/premium"
-                        onClick={(e) => e.stopPropagation()}
-                        className="mt-3 w-full py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-opacity hover:opacity-90 active:opacity-80"
-                        style={{ backgroundColor: "#c9a84c", color: "#0a0a0a" }}
-                      >
-                        <Video size={12} />
-                        Solicitar Vídeo-Check
-                      </Link>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h2 className="text-xl font-bold" style={{ color: "#c9a84c" }}>
+              Anunciantes Verificados
+            </h2>
+            <p className="text-xs text-gray-500 mt-0.5">
+              Vídeo-Check disponível em 1 minuto
+            </p>
           </div>
+          <div
+            className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full border"
+            style={{ borderColor: "#1a2a1a", color: "#c9a84c" }}
+          >
+            <span
+              className="w-1.5 h-1.5 rounded-full animate-pulse"
+              style={{ backgroundColor: "#c9a84c" }}
+            />
+            {anunciantes.length} disponíveis
+          </div>
+        </div>
 
-          {/* AO VIVO sidebar */}
-          <div id="ao-vivo" className="w-72 shrink-0">
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+          {anunciantes.map((a) => (
             <div
-              className="rounded-2xl border overflow-hidden sticky top-24"
-              style={{ backgroundColor: "#1a2a1a", borderColor: "#243424" }}
+              key={a.id}
+              onClick={() => router.push(`/perfil/${a.id}`)}
+              className="rounded-2xl overflow-hidden cursor-pointer group relative"
+              style={{
+                backgroundImage:
+                  "photo" in a && a.photo
+                    ? `url('${(a.photo as string).replace("?w=200", "?w=400&q=80")}')`
+                    : undefined,
+                backgroundSize: "cover",
+                backgroundPosition: "center top",
+                aspectRatio: "3 / 4",
+                backgroundColor: "#1a2a1a",
+              }}
             >
-              {/* Sidebar header */}
-              <div
-                className="px-5 py-4 flex items-center justify-between border-b"
-                style={{ borderColor: "#243424" }}
-              >
-                <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-                  <h3 className="font-bold text-white text-sm">Hub Ao Vivo</h3>
+              {/* Overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent transition-opacity group-hover:from-black/80" />
+
+              {/* Content */}
+              <div className="relative z-10 h-full flex flex-col justify-between p-4">
+                {/* Top: badge + live dot */}
+                <div className="flex items-center justify-between">
+                  <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-full border border-green-800/60 backdrop-blur-sm" style={{ backgroundColor: "rgba(0,0,0,0.5)", color: "#4ade80" }}>
+                    <ShieldCheck size={9} />
+                    Verificada
+                  </span>
+                  <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
                 </div>
-                <span className="text-[9px] bg-red-600 text-white px-2 py-0.5 rounded font-black tracking-widest">
-                  AO VIVO
-                </span>
-              </div>
 
-              {/* Live profiles */}
-              <div className="p-3 space-y-2">
-                {aoVivo.map((p) => (
-                  <div
-                    key={p.id}
-                    className="rounded-xl p-3.5 flex items-center gap-3 border cursor-pointer hover:border-[#c9a84c]/30 transition-colors"
-                    style={{ backgroundColor: "#0d1a0d", borderColor: "#1a2a1a" }}
-                  >
-                    {/* Avatar */}
-                    <div
-                      className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0 font-bold text-sm"
-                      style={{ backgroundColor: "#1a2a1a", color: "#c9a84c" }}
-                    >
-                      {p.initials}
-                    </div>
-
-                    <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-white text-sm leading-tight">{p.name}</p>
-                      <div className="flex items-center gap-1 mt-0.5">
-                        <MapPin size={9} className="text-gray-600 shrink-0" />
-                        <span className="text-[11px] text-gray-500">{p.location}</span>
-                      </div>
-                    </div>
-
-                    <div className="flex flex-col items-end gap-1.5 shrink-0">
-                      <span className="text-[9px] bg-red-600 text-white px-1.5 py-0.5 rounded font-black tracking-wider">
-                        AO VIVO
-                      </span>
-                      <span className="text-[9px] font-bold text-green-400">
-                        DISPONÍVEL AGORA
-                      </span>
-                    </div>
+                {/* Bottom: name, location, rating, CTA */}
+                <div style={{ position: "relative", zIndex: 10 }}>
+                  <p className="font-bold text-white text-base leading-tight">{a.name}</p>
+                  <div className="flex items-center gap-1 mt-0.5">
+                    <MapPin size={10} className="text-gray-400 shrink-0" />
+                    <span className="text-xs text-gray-300">{a.location}</span>
                   </div>
-                ))}
-              </div>
-
-              <div className="px-4 pb-4">
-                <button
-                  className="w-full py-2.5 rounded-xl text-xs font-bold border flex items-center justify-center gap-1.5 transition-colors hover:opacity-80"
-                  style={{ borderColor: "#c9a84c", color: "#c9a84c" }}
-                >
-                  Ver todos ao vivo
-                  <ArrowRight size={12} />
-                </button>
+                  <div className="flex items-center gap-1.5 mt-1">
+                    <Star size={11} style={{ color: "#c9a84c", fill: "#c9a84c" }} />
+                    <span className="text-xs font-bold" style={{ color: "#c9a84c" }}>
+                      {a.rating.toFixed(1)}
+                    </span>
+                    <span className="text-[10px] text-gray-400">· {a.sessions} sessões</span>
+                  </div>
+                  <Link
+                    href="/premium"
+                    onClick={(e) => e.stopPropagation()}
+                    className="mt-3 w-full py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-opacity hover:opacity-90 active:opacity-80"
+                    style={{ backgroundColor: "#c9a84c", color: "#0a0a0a" }}
+                  >
+                    <Video size={12} />
+                    Solicitar Vídeo-Check
+                  </Link>
+                </div>
               </div>
             </div>
-          </div>
+          ))}
         </div>
       </section>
 
