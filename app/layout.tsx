@@ -5,7 +5,7 @@ import "./globals.css";
 const geist = Geist({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Vibe Privê — Especialistas ao Vivo",
+  title: "Vibe Privê — O mais seguro e exclusivo do Brasil",
   description: "Conecte-se com especialistas em tempo real via vídeo-check",
 };
 
