@@ -10,6 +10,7 @@ import {
   Settings,
   Percent,
   Crown,
+  LogOut,
 } from "lucide-react";
 
 const links = [
@@ -23,6 +24,8 @@ const links = [
 
 export default function Sidebar() {
   const pathname = usePathname();
+
+  if (pathname === "/admin/login") return null;
 
   return (
     <aside className="w-64 min-h-screen bg-gray-900 text-white flex flex-col">
@@ -65,6 +68,13 @@ export default function Sidebar() {
         >
           <Settings size={18} />
           Configurações
+        </Link>
+        <Link
+          href="/admin/logout"
+          className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-400 hover:bg-gray-800 hover:text-white transition-colors"
+        >
+          <LogOut size={18} />
+          Sair
         </Link>
         <div className="mt-3 px-3 py-2 bg-gray-800 rounded-lg">
           <p className="text-xs text-gray-400">Modelo de receita</p>

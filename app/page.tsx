@@ -82,9 +82,6 @@ export default function PublicHome() {
           </nav>
 
           <div className="flex items-center gap-3">
-            <Link href="/admin" className="text-sm text-gray-400 hover:text-white transition-colors">
-              Admin
-            </Link>
             <Link
               href="/premium"
               className="text-sm font-bold px-4 py-2 rounded-lg transition-colors"
