@@ -8,22 +8,27 @@ import {
   Calendar,
   Camera,
   Plus,
-  Trash2,
   Save,
-  Clock,
   DollarSign,
   Upload,
   CheckCircle,
   ShieldCheck,
 } from "lucide-react";
+import { ESTADOS, CIDADES_POR_ESTADO } from "@/lib/brazil-locations";
 
 type Tab = "perfil" | "servicos" | "disponibilidade" | "fotos";
 
-interface Service {
-  id: number;
+const SERVICE_CATEGORIES = [
+  "Acompanhante VIP",
+  "Massoterapia Premium",
+  "Venda de Conteúdo",
+  "Sugar Baby",
+];
+
+interface ServiceCategoryState {
   name: string;
-  duration: string;
-  price: number;
+  enabled: boolean;
+  price: string;
 }
 
 const DAYS = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"];
@@ -41,7 +46,8 @@ export default function PainelAnunciante() {
   // Profile state
   const [profile, setProfile] = useState({
     name: "Cleia M.",
-    location: "Banibarra",
+    estado: "",
+    cidade: "",
     bio: "Perfil verificado com badge Vídeo-Check ativo. Disponível para sessões ao vivo e agendamentos.",
     phone: "",
     age: "",
@@ -49,13 +55,9 @@ export default function PainelAnunciante() {
   const [profileSaved, setProfileSaved] = useState(false);
 
   // Services state
-  const [services, setServices] = useState<Service[]>([
-    { id: 1, name: "Vídeo-Check (1 min)", duration: "1 min", price: 50 },
-    { id: 2, name: "Vídeo Privado", duration: "15 min", price: 120 },
-    { id: 3, name: "Sessão Premium", duration: "30 min", price: 200 },
-  ]);
-  const [showServiceForm, setShowServiceForm] = useState(false);
-  const [newService, setNewService] = useState({ name: "", duration: "", price: "" });
+  const [serviceCategories, setServiceCategories] = useState<ServiceCategoryState[]>(
+    SERVICE_CATEGORIES.map((name) => ({ name, enabled: false, price: "" }))
+  );
 
   // Availability state
   const [availability, setAvailability] = useState<Set<string>>(
@@ -76,23 +78,16 @@ export default function PainelAnunciante() {
     setAvailSaved(false);
   }
 
-  function addService() {
-    if (!newService.name || !newService.price) return;
-    setServices((prev) => [
-      ...prev,
-      {
-        id: Date.now(),
-        name: newService.name,
-        duration: newService.duration || "—",
-        price: Number(newService.price),
-      },
-    ]);
-    setNewService({ name: "", duration: "", price: "" });
-    setShowServiceForm(false);
+  function toggleServiceCategory(name: string) {
+    setServiceCategories((prev) =>
+      prev.map((s) => (s.name === name ? { ...s, enabled: !s.enabled } : s))
+    );
   }
 
-  function removeService(id: number) {
-    setServices((prev) => prev.filter((s) => s.id !== id));
+  function setServicePrice(name: string, price: string) {
+    setServiceCategories((prev) =>
+      prev.map((s) => (s.name === name ? { ...s, price } : s))
+    );
   }
 
   const tabs: { key: Tab; label: string; icon: React.ElementType }[] = [
@@ -155,7 +150,11 @@ export default function PainelAnunciante() {
                 Vídeo Verificado
               </span>
             </div>
-            <p className="text-xs text-gray-500 mt-0.5">{profile.location}</p>
+            <p className="text-xs text-gray-500 mt-0.5">
+              {profile.cidade && profile.estado
+                ? `${profile.cidade} - ${profile.estado}`
+                : "Localização não definida"}
+            </p>
           </div>
           <div className="text-right">
             <p className="text-xs text-gray-600">Perfil ativo</p>
@@ -211,13 +210,42 @@ export default function PainelAnunciante() {
               </div>
               <div>
                 <label className="block text-xs text-gray-400 mb-1.5">Localização</label>
-                <input
-                  value={profile.location}
-                  onChange={(e) => { setProfile((p) => ({ ...p, location: e.target.value })); setProfileSaved(false); }}
-                  className="w-full px-4 py-2.5 rounded-xl text-sm text-white outline-none border"
-                  style={{ backgroundColor: DARK, borderColor: BORDER }}
-                  placeholder="Bairro / Cidade"
-                />
+                <div className="grid grid-cols-2 gap-2">
+                  <select
+                    value={profile.estado}
+                    onChange={(e) => {
+                      const estado = e.target.value;
+                      setProfile((p) => ({ ...p, estado, cidade: "" }));
+                      setProfileSaved(false);
+                    }}
+                    className="w-full px-3 py-2.5 rounded-xl text-sm text-white outline-none border"
+                    style={{ backgroundColor: DARK, borderColor: BORDER }}
+                  >
+                    <option value="">Estado</option>
+                    {ESTADOS.map((uf) => (
+                      <option key={uf.sigla} value={uf.sigla}>
+                        {uf.nome}
+                      </option>
+                    ))}
+                  </select>
+                  <select
+                    value={profile.cidade}
+                    onChange={(e) => {
+                      setProfile((p) => ({ ...p, cidade: e.target.value }));
+                      setProfileSaved(false);
+                    }}
+                    disabled={!profile.estado}
+                    className="w-full px-3 py-2.5 rounded-xl text-sm text-white outline-none border disabled:opacity-40 disabled:cursor-not-allowed"
+                    style={{ backgroundColor: DARK, borderColor: BORDER }}
+                  >
+                    <option value="">Cidade</option>
+                    {(CIDADES_POR_ESTADO[profile.estado] ?? []).map((cidade) => (
+                      <option key={cidade} value={cidade}>
+                        {cidade}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
               <div>
                 <label className="block text-xs text-gray-400 mb-1.5">Idade</label>
@@ -281,105 +309,75 @@ export default function PainelAnunciante() {
             className="rounded-2xl p-6 border"
             style={{ backgroundColor: CARD, borderColor: BORDER }}
           >
-            <div className="flex items-center justify-between mb-5">
-              <h2 className="font-bold text-base" style={{ color: GOLD }}>
-                Serviços & Preços
-              </h2>
-              <button
-                onClick={() => setShowServiceForm((v) => !v)}
-                className="flex items-center gap-1.5 text-xs font-bold px-3 py-2 rounded-lg transition-opacity hover:opacity-80"
-                style={{ backgroundColor: GOLD, color: "#0a0a0a" }}
-              >
-                <Plus size={13} />
-                Novo Serviço
-              </button>
-            </div>
+            <h2 className="font-bold text-base mb-1" style={{ color: GOLD }}>
+              Serviços & Preços
+            </h2>
+            <p className="text-xs text-gray-500 mb-5">
+              Selecione as categorias de serviço que você oferece e defina seu preço para cada uma.
+            </p>
 
-            {/* Add form */}
-            {showServiceForm && (
-              <div
-                className="rounded-xl p-4 border mb-4 grid grid-cols-3 gap-3"
-                style={{ backgroundColor: DARK, borderColor: BORDER }}
-              >
-                <div>
-                  <label className="block text-[10px] text-gray-500 mb-1">Nome do serviço</label>
-                  <input
-                    value={newService.name}
-                    onChange={(e) => setNewService((s) => ({ ...s, name: e.target.value }))}
-                    className="w-full px-3 py-2 rounded-lg text-xs text-white outline-none border"
-                    style={{ backgroundColor: "#0a0a0a", borderColor: BORDER }}
-                    placeholder="Ex: Vídeo-Check"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[10px] text-gray-500 mb-1">Duração</label>
-                  <input
-                    value={newService.duration}
-                    onChange={(e) => setNewService((s) => ({ ...s, duration: e.target.value }))}
-                    className="w-full px-3 py-2 rounded-lg text-xs text-white outline-none border"
-                    style={{ backgroundColor: "#0a0a0a", borderColor: BORDER }}
-                    placeholder="Ex: 30 min"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[10px] text-gray-500 mb-1">Preço (R$)</label>
-                  <input
-                    value={newService.price}
-                    onChange={(e) => setNewService((s) => ({ ...s, price: e.target.value }))}
-                    type="number"
-                    className="w-full px-3 py-2 rounded-lg text-xs text-white outline-none border"
-                    style={{ backgroundColor: "#0a0a0a", borderColor: BORDER }}
-                    placeholder="0"
-                  />
-                </div>
-                <div className="col-span-3 flex gap-2">
-                  <button
-                    onClick={addService}
-                    className="px-4 py-2 rounded-lg text-xs font-bold transition-opacity hover:opacity-90"
-                    style={{ backgroundColor: GOLD, color: "#0a0a0a" }}
-                  >
-                    Adicionar
-                  </button>
-                  <button
-                    onClick={() => setShowServiceForm(false)}
-                    className="px-4 py-2 rounded-lg text-xs text-gray-400 hover:text-white transition-colors"
-                  >
-                    Cancelar
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* Services list */}
+            {/* Service category selector */}
             <div className="space-y-2">
-              {services.map((s) => (
+              {serviceCategories.map((s) => (
                 <div
-                  key={s.id}
-                  className="flex items-center gap-4 p-4 rounded-xl border"
-                  style={{ backgroundColor: DARK, borderColor: BORDER }}
+                  key={s.name}
+                  className="flex items-center gap-4 p-4 rounded-xl border transition-colors"
+                  style={{
+                    backgroundColor: DARK,
+                    borderColor: s.enabled ? GOLD : BORDER,
+                  }}
                 >
-                  <div className="flex-1">
-                    <p className="font-semibold text-white text-sm">{s.name}</p>
-                    <div className="flex items-center gap-3 mt-0.5">
-                      <span className="flex items-center gap-1 text-[11px] text-gray-500">
-                        <Clock size={10} />
-                        {s.duration}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className="font-black text-lg" style={{ color: GOLD }}>
-                      R$ {s.price}
-                    </span>
-                    <button
-                      onClick={() => removeService(s.id)}
-                      className="p-1.5 rounded-lg text-gray-600 hover:text-red-400 transition-colors"
-                    >
-                      <Trash2 size={14} />
-                    </button>
+                  <button
+                    onClick={() => toggleServiceCategory(s.name)}
+                    className="w-5 h-5 rounded-md border flex items-center justify-center shrink-0 transition-colors"
+                    style={
+                      s.enabled
+                        ? { backgroundColor: GOLD, borderColor: GOLD }
+                        : { backgroundColor: "transparent", borderColor: BORDER }
+                    }
+                    aria-label={`Selecionar categoria ${s.name}`}
+                    aria-pressed={s.enabled}
+                  >
+                    {s.enabled && <CheckCircle size={13} color="#0a0a0a" />}
+                  </button>
+
+                  <p className="flex-1 font-semibold text-white text-sm">{s.name}</p>
+
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-xs text-gray-500">R$</span>
+                    <input
+                      value={s.price}
+                      onChange={(e) => setServicePrice(s.name, e.target.value)}
+                      disabled={!s.enabled}
+                      type="number"
+                      min={0}
+                      placeholder="0"
+                      className="w-24 px-3 py-2 rounded-lg text-sm text-white outline-none border disabled:opacity-40 disabled:cursor-not-allowed"
+                      style={{ backgroundColor: "#0a0a0a", borderColor: BORDER }}
+                    />
                   </div>
                 </div>
               ))}
+
+              {/* Fixed platform benefit — no price field */}
+              <div
+                className="flex items-center gap-4 p-4 rounded-xl border"
+                style={{ backgroundColor: DARK, borderColor: BORDER }}
+              >
+                <ShieldCheck size={18} style={{ color: GOLD }} className="shrink-0" />
+                <div className="flex-1">
+                  <p className="font-semibold text-white text-sm">Vídeo-Check</p>
+                  <p className="text-[11px] text-gray-500 mt-0.5">
+                    Benefício da plataforma para assinantes — sem preço definido por você
+                  </p>
+                </div>
+                <span
+                  className="text-[10px] font-bold px-2.5 py-1 rounded-full"
+                  style={{ backgroundColor: GOLD + "22", color: GOLD }}
+                >
+                  Incluso
+                </span>
+              </div>
             </div>
 
             <p className="text-[11px] text-gray-600 mt-4 flex items-center gap-1.5">
